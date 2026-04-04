@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://dw850hpqudwdr"]
+
+[ext_resource type="Texture2D" uid="uid://kg3652s5ptuf" path="res://assets/chess.png" id="1_tqh1c"]
+[ext_resource type="Script" uid="uid://b0n70up3r34xn" path="res://Scripts/Player.cs" id="1_x7q8p"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_x7q8p"]
+radius = 5.0
+
+[node name="Player" type="CharacterBody2D" unique_id=1514882581]
+script = ExtResource("1_x7q8p")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1054252058]
+texture = ExtResource("1_tqh1c")
+region_enabled = true
+region_rect = Rect2(48, 16, 16, 16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1724876370]
+shape = SubResource("CircleShape2D_x7q8p")

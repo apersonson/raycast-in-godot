@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://f0ews5e0ub8k"]
+
+[node name="Complete" type="Node2D" unique_id=2135344971]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1614860426]
+zoom = Vector2(4, 4)
+
+[node name="Button" type="Button" parent="." unique_id=38110459]
+offset_left = -45.0
+offset_top = 8.0
+offset_right = 47.0
+offset_bottom = 39.0
+text = "Complete!!"
