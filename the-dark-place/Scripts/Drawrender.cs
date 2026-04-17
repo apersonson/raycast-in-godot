@@ -1,27 +1,31 @@
 using Godot;
 using System;
 using Godot.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel;
 
 public partial class Drawrender : Node2D
 {
     private Array<float> _distances = new Array<float>();
-    
+     public Array<Hittedthis> _whathitteds = new Array<Hittedthis>();  
+      public Array<float> _offsets = new Array<float>();
     [Export] public float MaxDistance = 500f; 
     [Export] public float WallHeightMultiplier = 20000f;
     [Export] public Texture2D WallTexture; // 인스펙터에서 벽 이미지(예: 벽돌)를 넣어주세요.
-
+    [Export] public Texture2D CompleteZoneTexture;
     public override void _Ready()
     {
         var raycast2D = GetNode<RayCastRendering>("%RayCast2D");
         raycast2D.DrawRender += Rendering;
     }
 
-    public void Rendering(Array<float> distances)
-    {
-        _distances = distances.Duplicate(); 
-        QueueRedraw();
-    }
-
+   public void Rendering(Array<float> distances, Array<Hittedthis> whathitteds, Array<float> textureOffsets)
+{
+    _distances = distances.Duplicate(); 
+    _whathitteds = whathitteds.Duplicate();
+    _offsets = textureOffsets.Duplicate(); // 이 데이터를 저장해서 사용하세요
+    QueueRedraw();
+}
     public override void _Draw()
     {
         // 텍스처가 없으면 기본 로직으로 그리거나 리턴합니다.
@@ -30,34 +34,33 @@ public partial class Drawrender : Node2D
         float screenWidth = GetViewportRect().Size.X;
         float screenHeight = GetViewportRect().Size.Y;
         float columnWidth = screenWidth / _distances.Count;
-        float textureWidth = WallTexture.GetSize().X;
-        float textureHeight = WallTexture.GetSize().Y;
+for (int i = 0; i < _distances.Count; i++)
+    {
+        float dist = _distances[i];
+        if (dist > MaxDistance * 2) continue; // 너무 멀면 생략
 
-        for (int i = 0; i < _distances.Count; i++)
-        {
-            float dist = _distances[i];
-            float xPos = i * columnWidth;
+        Hittedthis whathitCheck = _whathitteds[i];
+        float offset = _offsets[i]; // RayCast에서 계산해준 0~1 값
+        
+        Texture2D currentTex = (whathitCheck == Hittedthis.CompleteArea) ? CompleteZoneTexture : WallTexture; //나중에 더 늘어나면 삼향 말고 인프로 바꾸기
+        if (currentTex == null) continue;
+    float texWidth = currentTex.GetSize().X;
+        float texHeight = currentTex.GetSize().Y;
+        // 핵심: 전체 화면 비율이 아니라, 실제 부딪힌 지점의 텍스처 픽셀 계산
+        float sampleX = offset * texWidth;
 
-            // 1. 벽의 높이 계산
-            float lineHeight = WallHeightMultiplier / (dist + 0.1f);
-            // 원근감을 위해 화면 높이보다 커질 수 있게 둡니다 (단, 너무 크면 성능 위해 제한 가능)
-            
-            // 2. 그릴 영역 설정 (화면상 어디에?)
-            Rect2 destRect = new Rect2(xPos, (screenHeight - lineHeight) / 2, columnWidth + 1, lineHeight);
+        // 화면에 그려질 세로 줄 영역
+        float lineHeight = WallHeightMultiplier / (dist + 0.1f);
+        Rect2 destRect = new Rect2(i * columnWidth, (screenHeight - lineHeight) / 2, columnWidth + 1, lineHeight);
 
-            // 3. 텍스처 샘플링 영역 설정 (이미지에서 어디를?)
-            // i / _distances.Count는 0~1 사이의 값입니다. 
-            // 이를 텍스처 가로 길이에 곱하면 텍스처를 전체 벽면에 한 번 펼친 모양이 됩니다.
-            float sampleX = (float)i / _distances.Count * textureWidth;
-            Rect2 srcRect = new Rect2(sampleX, 0, 1, textureHeight); 
+        // 텍스처에서 잘라올 세로 줄 영역 (1픽셀 너비)
+        Rect2 srcRect = new Rect2(sampleX, 0, 1, texHeight); 
 
-            // 4. 거리 기반 어둡기(안개) 처리
-            float brightness = 1.0f - Mathf.Clamp(dist / MaxDistance*3f, 0.0f, 1.0f);
-            // 벽의 원래 색감을 유지하면서 거리만큼 어둡게 만듭니다.
-            Color wallColor = new Color(brightness/2, brightness/2, brightness/2);
+        // 색상 및 안개 처리
+        float brightness = 1.0f - Mathf.Clamp(dist / MaxDistance, 0.0f, 1.0f);
+        Color wallColor = new Color(brightness/2, brightness/2, brightness/2);
 
-            // 5. 핵심: 텍스처의 특정 세로 줄만 그려서 벽을 형성
-            DrawTextureRectRegion(WallTexture, destRect, srcRect, wallColor);
-        }
+        DrawTextureRectRegion(currentTex, destRect, srcRect, wallColor);
+    }
     }
 }

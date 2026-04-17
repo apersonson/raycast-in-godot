@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://p5hvnikfr6r3" path="res://Scripts/CompleteArea.cs" id="3_ayy0r"]
 [ext_resource type="Script" uid="uid://d0ialcr5mga58" path="res://Scripts/Drawrender.cs" id="5_ox2w1"]
 [ext_resource type="Texture2D" uid="uid://qef8o2sykcyr" path="res://assets/forest tiles/grass-1.png" id="6_70ml4"]
+[ext_resource type="Texture2D" uid="uid://ed18guj8v3n3" path="res://assets/fuckingScary.png" id="7_8frii"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mf4c4"]
 texture = ExtResource("1_0wfyw")
@@ -337,12 +338,16 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_mf4c4")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mf4c4"]
-size = Vector2(54, 29)
+size = Vector2(39, 18)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_itt44"]
+atlas = ExtResource("7_8frii")
+region = Rect2(0, 0, 264.105, 335)
 
 [node name="gameroot" type="Node2D" unique_id=1880227186]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=842507582]
-position = Vector2(1151, -322)
+position = Vector2(1183, -322)
 zoom = Vector2(1, 1.3)
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=732695140]
@@ -353,20 +358,24 @@ tile_set = SubResource("TileSet_ayy0r")
 unique_name_in_owner = true
 position = Vector2(-1, 0)
 
-[node name="RayCast2D" type="RayCast2D" parent="Player" unique_id=528668333 node_paths=PackedStringArray("walls")]
+[node name="RayCast2D" type="RayCast2D" parent="Player" unique_id=528668333 node_paths=PackedStringArray("walls", "Complete")]
 unique_name_in_owner = true
 target_position = Vector2(0, 500)
+collide_with_areas = true
 script = ExtResource("3_4vxml")
 walls = NodePath("../../TileMapLayer")
+Complete = NodePath("../../Complete")
 
-[node name="Area2D" type="Area2D" parent="." unique_id=1029906358]
+[node name="Complete" type="Area2D" parent="." unique_id=1029906358]
+position = Vector2(-193, 67)
 script = ExtResource("3_ayy0r")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1539151281]
-position = Vector2(-194, 50.5)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Complete" unique_id=1539151281]
+position = Vector2(2.5, 6)
 shape = SubResource("RectangleShape2D_mf4c4")
 
 [node name="Drawrender" type="Node2D" parent="." unique_id=1611148460]
 position = Vector2(609, -646)
 script = ExtResource("5_ox2w1")
 WallTexture = ExtResource("6_70ml4")
+CompleteZoneTexture = SubResource("AtlasTexture_itt44")
